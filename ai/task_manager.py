@@ -20,13 +20,14 @@ from .verification_agent import VerificationAgent
 from .planning_agent import PlanningAgent
 from .self_modification_agent import SelfModificationAgent
 from .code_generation_agent import CodeGenerationAgent
+import asyncio
 
 class TaskManager:
     def __init__(self, logger, model_path, initial_code_str=""):
         self.logger = logger
         self.code_generator = CodeGeneratorAI(model_path)
         self.liquid_nn = LiquidNeuralNetwork(input_size=10, hidden_size=50, output_size=10)
-        self.self_modifying_ai = SelfModifyingAI(initial_code_str)
+        self.self_modifying_ai = SelfModifyingAI(model_path, initial_code_str)
         self.hypernetwork = HyperNetwork(z_dim=5, target_dims=[(50, 10), (50,), (10, 50), (10,)])
         self.target_network = TargetNetwork(input_size=10, hidden_size=50, output_size=10)
         self.npi = NPI(input_size=1, hidden_size=32, num_subroutines=5)
@@ -40,25 +41,25 @@ class TaskManager:
         self.agents = {
             'code_generation': CodeGenerationAgent('CodeGeneratorAgent', model_path),
             'verification': VerificationAgent('VerificationAgent'),
-            'self_modify_code': SelfModificationAgent('SelfModificationAgent'),
+            'self_modify_code': SelfModificationAgent('SelfModificationAgent', model_path, initial_code_str),
             'planning': PlanningAgent('PlanningAgent'),
         }
 
-    def execute_task(self, instruction):
+    async def execute_task(self, instruction):
         task_type, details = self.parse_instruction(instruction)
         if task_type == 'complex_task':
             # Use PlanningAgent to decompose the task
-            subtasks = self.agents['planning'].process(details)
+            subtasks = await self.agents['planning'].process(details)
             for subtask in subtasks:
-                self.execute_task(subtask)
+                await self.execute_task(subtask)
         else:
             agent = self.agents.get(task_type)
             if agent:
-                result = agent.process(details)
+                result = await agent.process(details)
                 # Handle the result or pass it to the next agent
                 if task_type == 'code_generation':
                     # Pass generated code to VerificationAgent
-                    verification_results = self.agents['verification'].process(result)
+                    verification_results = await self.agents['verification'].process(result)
                     # Select the best code based on verification
                     best_code = self.select_best_code(verification_results)
                     if best_code:
@@ -70,7 +71,7 @@ class TaskManager:
                     print(result)
                 else:
                     # Handle other task types
-                    pass
+                    print(result)
             else:
                 print(f"No agent available for task type: {task_type}")
 

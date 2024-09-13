@@ -32,7 +32,7 @@ def example_function():
     # Run test cases
     for i, test_case in enumerate(test_cases, 1):
         logger.info(f"Test Case {i}: {test_case}")
-        task_manager.execute_task(test_case)
+        await task_manager.execute_task(test_case)
         logger.info("=" * 50)
 
     # Test a complex task that requires planning

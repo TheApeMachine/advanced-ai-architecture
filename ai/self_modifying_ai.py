@@ -3,12 +3,13 @@ import astor
 import types
 import copy
 import random
+from ai.code_generator_ai import CodeGeneratorAI
 
 class SelfModifyingAI:
-    def __init__(self, code_str="", language="python"):
-        self.code = ""
-        self.language = language
-        self.load_code(code_str)
+    def __init__(self, model, initial_code_str):
+        self.model = model
+        self.current_code = initial_code_str
+        self.code_generator = CodeGeneratorAI(model)
 
     def load_code(self, code_str):
         self.code = code_str
@@ -94,9 +95,10 @@ class SelfModifyingAI:
         # Placeholder implementation
         return ast_tree  # Replace with actual mutation logic
 
-    def modify_code(self, task_details):
+    async def modify_code(self, task_details):
         modify_fn = self.code_generator.generate_modification_function(task_details)
-        self.ast_tree = modify_fn(self.ast_tree)
+        self.current_code = modify_fn(self.current_code)
+        return self.current_code
 
     def ast_to_code(self, ast_tree):
         if self.language == 'python':

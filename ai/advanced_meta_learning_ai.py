@@ -83,8 +83,8 @@ class AdvancedMetaLearningAI:
         # Determine the best meta-learner for the task
         # Placeholder for selection logic
         selected_learner = self.meta_learners['MAML']
-        # Perform meta-training
-        tasks = self.create_meta_tasks(potential_states)
+        # Perform meta-training.
+        tasks = self.create_meta_tasks(self.model, potential_states)
         selected_learner.meta_train(self.model, tasks)
     
     def optimize_with_quantum(self, potential_states):

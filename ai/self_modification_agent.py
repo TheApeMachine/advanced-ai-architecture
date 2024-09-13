@@ -1,12 +1,9 @@
 from .self_modifying_ai import SelfModifyingAI
-from .agent_base import AgentBase
 
-class SelfModificationAgent(AgentBase):
-    def __init__(self, name):
-        super().__init__(name)
-        self.self_modifying_ai = SelfModifyingAI()
+class SelfModificationAgent:
+    def __init__(self, name, model_path, initial_code_str=""):
+        self.name = name
+        self.self_modifying_ai = SelfModifyingAI(model_path, initial_code_str)
 
-    def process(self, task_details):
-        # Implement logic to modify code
-        modification_result = self.self_modifying_ai.modify_code(task_details)
-        return modification_result
+    async def process(self, task_details):
+        return await self.self_modifying_ai.modify_code(task_details)

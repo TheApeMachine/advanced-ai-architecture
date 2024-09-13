@@ -21,3 +21,6 @@ pycapnp
 astor
 captum
 z3
+qdrant_client
+sentence_transformers
+docker
