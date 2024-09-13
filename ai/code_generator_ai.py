@@ -1,16 +1,21 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from .context_manager import ContextManager
+import torch
+from transformers import BertModel, BertTokenizer
+from .multi_modal_encoders import PseudocodeEncoder, DiagramEncoder
+from world.domain import Domain
+from .model import Model
 
 class CodeGeneratorAI:
-    def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-j-6B")
-        self.model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
+    def __init__(self, model_path):
+        self.model = Model(model_path)
         self.reward_history = []
-        self.temperature = 0.7  # Initial temperature for sampling
+        self.temperature = 0.7
         self.previous_params = {}
         self.fisher_information = {}
         self.context_manager = ContextManager()
         self.style_embeddings = self.load_style_embeddings()
-        self.style = 'default'  # Can be set dynamically
+        self.style = 'default'
         self.nl_encoder = BertModel.from_pretrained('bert-base-uncased')
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.pseudocode_encoder = PseudocodeEncoder()
@@ -27,56 +32,40 @@ class CodeGeneratorAI:
         else:
             print(f"Style {style_name} not found. Using default style.")
 
-    def generate_code(self, prompt, pseudocode=None, diagram=None, max_length=150):
-        embeddings = []
+    async def generate_code(self, prompt, pseudocode=None, diagram=None, max_length=1024):
+        full_prompt = self._prepare_prompt(prompt, pseudocode, diagram)
+        
+        async for chunk in self.model.generate(
+            full_prompt,
+            max_new_tokens=max_length,
+            temperature=self.model.characters["default"]["temperature"],
+            top_p=self.model.characters["default"]["top_p"],
+            repeat_penalty=self.model.characters["default"]["repeat_penalty"]
+        ):
+            yield chunk
 
-        # Encode prompt (natural language)
-        inputs = self.tokenizer(prompt, return_tensors='pt')
-        nl_embedding = self.nl_encoder(**inputs).last_hidden_state
-        embeddings.append(nl_embedding)
-
-        # Encode pseudocode if provided
+    def _prepare_prompt(self, prompt, pseudocode=None, diagram=None):
+        full_prompt = f"### Instruction: Generate code based on the following prompt:\n{prompt}\n"
+        
         if pseudocode:
-            pseudocode_embedding = self.pseudocode_encoder.encode(pseudocode)
-            embeddings.append(pseudocode_embedding)
-
-        # Encode diagram if provided
-        if diagram is not None:
-            diagram_embedding = self.diagram_encoder.encode(diagram)
-            embeddings.append(diagram_embedding)
-
-        # Combine embeddings
-        combined_embedding = torch.cat(embeddings, dim=1)
-
-        # Use combined_embedding in code generation
-        # Placeholder for actual implementation
-        # This may involve modifying the model architecture to accept embeddings
-
-        # Generate code
-        # For illustration, we'll assume the combined_embedding is used to initialize the decoder
-        outputs = self.model.generate(
-            input_ids=None,
-            inputs_embeds=combined_embedding,
-            max_length=max_length,
-            do_sample=True,
-            temperature=self.temperature
-        )
-        code = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return code
+            full_prompt += f"\nPseudocode:\n{pseudocode}\n"
+        
+        if diagram:
+            full_prompt += f"\nDiagram description:\n{diagram}\n"
+        
+        full_prompt += "\n### Response:"
+        return full_prompt
     
-    def generate_code_batch(self, prompts, max_length=150):
-        input_ids = self.tokenizer(prompts, return_tensors='pt', padding=True, truncation=True).input_ids
-        outputs = self.model.generate(
-            input_ids,
-            max_length=max_length,
-            do_sample=True,
-            temperature=self.temperature
-        )
-        codes = [self.tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
+    async def generate_code_batch(self, prompts, max_length=1024):
+        codes = []
+        for prompt in prompts:
+            full_code = ""
+            async for chunk in self.generate_code(prompt, max_length=max_length):
+                full_code += chunk
+            codes.append(full_code)
         return codes
 
     def adjust_parameters(self, reward):
-        # Adjust temperature based on reward
         self.reward_history.append(reward)
         if reward > 0:
             self.temperature = max(self.temperature - 0.01, 0.5)
@@ -106,9 +95,3 @@ class CodeGeneratorAI:
             output = self.model(data)
             loss = self.compute_loss(output, data['target']) + self.ewc_loss()
             # Backpropagation and optimization
-
-# Usage
-ai = CodeGeneratorAI()
-prompt = "### Python function to calculate factorial\n"
-code = ai.generate_code(prompt)
-print(code)

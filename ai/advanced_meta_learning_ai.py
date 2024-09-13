@@ -8,15 +8,17 @@ from qiskit.primitives import Sampler
 from qiskit_algorithms import QAOA
 from qiskit_optimization import QuadraticProgram
 from qiskit_algorithms.optimizers import COBYLA
+from qiskit.quantum_info import SparsePauliOp 
 from pyro.infer import SVI, Trace_ELBO
 import pyro
 import pyro.distributions as dist
 from ai.explainability_module import ExplainabilityModule
 
-from ai.memory_bank import MemoryBank
-from nas_nn import NASNeuralNetwork
-from ai.maml import maml_step
-from ai.quantum_optimizer import QuantumOptimizer
+from .memory_bank import MemoryBank
+from .nas_nn import NASNeuralNetwork
+from .maml import maml_step, MAMLModel
+from .quantum_optimizer import QuantumOptimizer
+from .meta_learners import MAML, Reptile, PrototypicalNetworks
 
 class AdvancedMetaLearningAI:
     def __init__(self, coder):
@@ -82,13 +84,13 @@ class AdvancedMetaLearningAI:
         # Placeholder for selection logic
         selected_learner = self.meta_learners['MAML']
         # Perform meta-training
+        tasks = self.create_meta_tasks(potential_states)
         selected_learner.meta_train(self.model, tasks)
     
     def optimize_with_quantum(self, potential_states):
-        def optimize(self, potential_states):
         # Define cost operator based on potential_states
         # Placeholder for actual cost operator
-        cost_operator = PauliSumOp.from_list([("Z" * 5, 1.0)])
+        cost_operator = SparsePauliOp.from_list([("Z" * 5, 1.0)])
         result = self.quantum_optimizer.optimize(cost_operator)
         # Use result to update knowledge base
         optimized_state = result.x

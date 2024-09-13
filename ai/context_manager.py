@@ -1,5 +1,3 @@
-# File: ai/context_manager.py
-
 class ContextManager:
     def __init__(self):
         self.context = ""

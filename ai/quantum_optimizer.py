@@ -1,9 +1,7 @@
-# File: ai/quantum_optimizer.py
-
-from qiskit import QuantumCircuit, Aer, transpile
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 from qiskit.circuit import ParameterVector
-from qiskit.algorithms.optimizers import COBYLA
-from qiskit.opflow import PauliExpectation, CircuitSampler, StateFn, PauliSumOp
+from qiskit_algorithms.optimizers import COBYLA
 import numpy as np
 
 class QuantumOptimizer:

@@ -1,6 +1,5 @@
-# File: ai/neural_symbolic_code_generator.py
-
 from z3 import Solver, Int, sat
+from .code_generator_ai import CodeGeneratorAI
 
 class NeuralSymbolicCodeGenerator:
     def __init__(self):
@@ -24,14 +23,3 @@ class NeuralSymbolicCodeGenerator:
         s.add(y == x + 1)
         result = s.check()
         return result == sat
-
-# Usage
-if __name__ == "__main__":
-    generator = NeuralSymbolicCodeGenerator()
-    spec = "Generate a function that returns the successor of a positive integer."
-    code = generator.generate_code(spec)
-    if code:
-        print("Generated Code:")
-        print(code)
-    else:
-        print("Failed to generate code that meets the specification.")

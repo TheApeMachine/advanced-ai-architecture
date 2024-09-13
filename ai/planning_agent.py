@@ -1,4 +1,5 @@
-from task_decomposer import TaskDecomposer
+from .task_decomposer import TaskDecomposer
+from .agent_base import AgentBase
 
 class PlanningAgent(AgentBase):
     def __init__(self, name):

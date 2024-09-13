@@ -1,5 +1,5 @@
 from transformers import BertTokenizer, BertModel
-from nas_nn import NASNeuralNetwork
+from .nas_nn import NASNeuralNetwork
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

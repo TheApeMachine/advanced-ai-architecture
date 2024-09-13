@@ -1,28 +1,32 @@
-from code_generator_ai import CodeGeneratorAI
-from liquid_neural_network import LiquidNeuralNetwork
-from self_modifying_ai import SelfModifyingAI
-from hypernetwork import HyperNetwork, TargetNetwork
-from npi import NPI
-from memory_bank import MemoryBank
-from ewc_model import EWCModel
-from code_verifier import CodeVerifier
-from advanced_meta_learning_ai import AdvancedMetaLearningAI
-from coder import Coder
-from ai.strategy_planner import StrategyPlanner
-from intent_classifier import IntentClassifier
+from .code_generator_ai import CodeGeneratorAI
+from .liquid_neural_network import LiquidNeuralNetwork
+from .self_modifying_ai import SelfModifyingAI
+from .hypernetwork import HyperNetwork, TargetNetwork
+from .npi import NPI
+from .memory_bank import MemoryBank
+from .ewc_model import EWCModel
+from .code_verifier import CodeVerifier
+from .advanced_meta_learning_ai import AdvancedMetaLearningAI
+from .coder import Coder
+from .strategy_planner import StrategyPlanner
+from .intent_classifier import IntentClassifier
 import subprocess
 import os
 import tempfile
 import re
 import torch
-from ncp import NCPCell
+from .ncp import NCPCell
+from .verification_agent import VerificationAgent
+from .planning_agent import PlanningAgent
+from .self_modification_agent import SelfModificationAgent
+from .code_generation_agent import CodeGenerationAgent
 
 class TaskManager:
-    def __init__(self, logger):
+    def __init__(self, logger, model_path, initial_code_str=""):
         self.logger = logger
-        self.code_generator = CodeGeneratorAI()
+        self.code_generator = CodeGeneratorAI(model_path)
         self.liquid_nn = LiquidNeuralNetwork(input_size=10, hidden_size=50, output_size=10)
-        self.self_modifying_ai = SelfModifyingAI()
+        self.self_modifying_ai = SelfModifyingAI(initial_code_str)
         self.hypernetwork = HyperNetwork(z_dim=5, target_dims=[(50, 10), (50,), (10, 50), (10,)])
         self.target_network = TargetNetwork(input_size=10, hidden_size=50, output_size=10)
         self.npi = NPI(input_size=1, hidden_size=32, num_subroutines=5)
@@ -34,7 +38,7 @@ class TaskManager:
         self.memory_bank = self.strategy_planner.memory_bank
         self.intent_classifier = IntentClassifier()
         self.agents = {
-            'code_generation': CodeGenerationAgent('CodeGeneratorAgent'),
+            'code_generation': CodeGenerationAgent('CodeGeneratorAgent', model_path),
             'verification': VerificationAgent('VerificationAgent'),
             'self_modify_code': SelfModificationAgent('SelfModificationAgent'),
             'planning': PlanningAgent('PlanningAgent'),
@@ -79,6 +83,8 @@ class TaskManager:
 
     def parse_instruction(self, instruction):
         intent = self.intent_classifier.classify(instruction)
+        # Make sure this method returns properly and doesn't
+        # call execute_task or parse_instruction again
         return intent, instruction
 
     def handle_neural_code_generation(self, details):
@@ -358,9 +364,3 @@ class TaskManager:
         # Interpret the output to make a decision
         # Placeholder implementation
         return "Decision based on NCP output"
-
-# Example usage
-if __name__ == "__main__":
-    task_manager = TaskManager()
-    instruction = "Generate a Python function to calculate the factorial of a number."
-    task_manager.execute_task(instruction)

@@ -1,34 +1,36 @@
 import ast
 import astor
 import types
+import copy
+import random
 
 class SelfModifyingAI:
-    def __init__(self, code_str, language='python'):
+    def __init__(self, code_str="", language="python"):
+        self.code = ""
         self.language = language
-        self.load_code(code_str, language)
+        self.load_code(code_str)
 
-    def load_code(self, code_str, language):
-        if language == 'python':
-            self.ast_tree = ast.parse(code_str)
-        elif language == 'java':
-            self.ast_tree = self.parse_java_code(code_str)
-        # Add support for other languages
+    def load_code(self, code_str):
+        self.code = code_str
+        if self.language == 'python':
+            self.ast_tree = ast.parse(self.code)
+            code_object = compile(self.ast_tree, filename="<ast>", mode="exec")
+            self.module = types.ModuleType("self_modifying_module")
+            exec(code_object, self.module.__dict__)
+        elif self.language == 'java':
+            self.ast_tree = self.parse_java_code(self.code)
 
     def parse_java_code(self, code_str):
         # Use a Java parser library, e.g., JavaParser
         # Placeholder implementation
         return None
-    def load_code(self):
-        self.ast_tree = ast.parse(self.code_str)
-        code_object = compile(self.ast_tree, filename="<ast>", mode="exec")
-        self.module = types.ModuleType("self_modifying_module")
-        exec(code_object, self.module.__dict__)
 
     def run(self, *args, **kwargs):
         if hasattr(self.module, 'main'):
             return self.module.main(*args, **kwargs)
         else:
             raise AttributeError("No 'main' function defined in the code.")
+
     def evolve_code(self, generations=10, population_size=20, mutation_rate=0.1):
         population = [copy.deepcopy(self.ast_tree) for _ in range(population_size)]
         for generation in range(generations):
@@ -92,15 +94,9 @@ class SelfModifyingAI:
         # Placeholder implementation
         return ast_tree  # Replace with actual mutation logic
 
-    def modify_code(self, modify_fn):
-        old_ast = copy.deepcopy(self.ast_tree)
+    def modify_code(self, task_details):
+        modify_fn = self.code_generator.generate_modification_function(task_details)
         self.ast_tree = modify_fn(self.ast_tree)
-        code_str = self.ast_to_code(self.ast_tree)
-        if self.formal_verifier.verify(code_str):
-            self.commit_code("Modified code with formal verification")
-        else:
-            print("Modification failed formal verification. Reverting changes.")
-            self.ast_tree = old_ast
 
     def ast_to_code(self, ast_tree):
         if self.language == 'python':

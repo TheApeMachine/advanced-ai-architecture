@@ -21,19 +21,3 @@ def compute_prototypes(embeddings, labels, num_classes):
         prototype = class_embeddings.mean(dim=0)
         prototypes.append(prototype)
     return torch.stack(prototypes)
-
-# Example usage
-input_size = 10
-hidden_size = 64
-num_classes = 5
-
-model = ProtoNet(input_size, hidden_size)
-
-# Assume support_set and query_set are provided
-support_embeddings = model(support_set['x'])
-prototypes = compute_prototypes(support_embeddings, support_set['y'], num_classes)
-
-query_embeddings = model(query_set['x'])
-distances = torch.cdist(query_embeddings, prototypes)
-log_p_y = F.log_softmax(-distances, dim=1)
-loss = F.nll_loss(log_p_y, query_set['y'])

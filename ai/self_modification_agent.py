@@ -1,4 +1,5 @@
-from self_modifying_ai import SelfModifyingAI
+from .self_modifying_ai import SelfModifyingAI
+from .agent_base import AgentBase
 
 class SelfModificationAgent(AgentBase):
     def __init__(self, name):

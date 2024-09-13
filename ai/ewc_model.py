@@ -45,33 +45,3 @@ class EWCModel(nn.Module):
         for name, param in self.named_parameters():
             ewc += (self.fisher[name] * (param - self.optimal_params[name]) ** 2).sum()
         return loss + 0.5 * ewc
-
-# Usage
-input_size = 784  # For MNIST
-hidden_size = 256
-output_size = 10
-
-model = EWCModel(input_size, hidden_size, output_size)
-optimizer = optim.SGD(model.parameters(), lr=0.01)
-
-# Assume task1_loader and task2_loader are DataLoader objects for two tasks
-# Training on Task 1
-for epoch in range(5):
-    for x, y in task1_loader:
-        optimizer.zero_grad()
-        output = model(x.view(-1, 784))
-        loss = nn.functional.cross_entropy(output, y)
-        loss.backward()
-        optimizer.step()
-model.compute_fisher(task1_loader)
-model.consolidate()
-
-# Training on Task 2 with EWC
-for epoch in range(5):
-    for x, y in task2_loader:
-        optimizer.zero_grad()
-        output = model(x.view(-1, 784))
-        loss = nn.functional.cross_entropy(output, y)
-        total_loss = model.ewc_loss(loss)
-        total_loss.backward()
-        optimizer.step()

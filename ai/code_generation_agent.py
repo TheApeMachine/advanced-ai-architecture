@@ -1,12 +1,12 @@
-# File: ai/agents.py
-
-from code_generator_ai import CodeGeneratorAI
-from coder import Coder
+from .code_generator_ai import CodeGeneratorAI
+from .coder import Coder
+from .agent_base import AgentBase
+from .experience_replay import ExperienceReplayBuffer
 
 class CodeGenerationAgent(AgentBase):
-    def __init__(self, name):
+    def __init__(self, name, model_path):
         super().__init__(name)
-        self.code_generator_ai = CodeGeneratorAI()
+        self.code_generator_ai = CodeGeneratorAI(model_path)
         self.coder = Coder()
         self.experience_buffer = ExperienceReplayBuffer()
 

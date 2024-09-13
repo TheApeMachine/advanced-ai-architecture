@@ -36,16 +36,3 @@ def maml_step(model, optimizer, tasks, inner_lr=0.01, meta_lr=0.001):
     meta_loss.backward()
     optimizer.step()
     return meta_loss.item()
-
-# Example usage
-input_size = 10
-hidden_size = 40
-output_size = 5
-
-model = MAMLModel(input_size, hidden_size, output_size)
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-# Assume tasks is a list of tasks with training and validation data
-for epoch in range(100):
-    loss = maml_step(model, optimizer, tasks)
-    print(f"Epoch {epoch}, Meta Loss: {loss}")

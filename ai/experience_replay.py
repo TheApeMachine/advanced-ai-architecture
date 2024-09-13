@@ -1,5 +1,3 @@
-# File: ai/experience_replay.py
-
 import random
 
 class ExperienceReplayBuffer:

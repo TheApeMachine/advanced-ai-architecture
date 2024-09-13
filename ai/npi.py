@@ -17,17 +17,3 @@ class NPI(nn.Module):
         next_subroutine_logits = self.subroutine_selector(h)
         output = self.output_layer(h)
         return output, next_subroutine_logits, h, c
-
-# Usage
-input_size = 1
-hidden_size = 32
-num_subroutines = 5
-
-npi = NPI(input_size, hidden_size, num_subroutines)
-x = torch.tensor([[1.0]])
-subroutine_id = torch.tensor([0])  # Starting subroutine
-h = torch.zeros(1, hidden_size)
-c = torch.zeros(1, hidden_size)
-
-output, next_subroutine_logits, h, c = npi(x, subroutine_id, h, c)
-print(output)

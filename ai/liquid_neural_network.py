@@ -28,25 +28,3 @@ class LiquidNeuralNetwork(nn.Module):
         h = self.liquid_layer(x, h_prev)
         y = self.output_layer(h)
         return y, h
-
-# Example usage
-input_size = 10
-hidden_size = 50
-output_size = 10
-
-model = LiquidNeuralNetwork(input_size, hidden_size, output_size)
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-criterion = nn.MSELoss()
-
-# Initialize hidden state
-h_prev = torch.zeros(1, hidden_size)
-
-# Simulate streaming data
-for t in range(1000):  # Time steps
-    x = torch.randn(1, input_size)  # New input at each time step
-    target = x.sum(dim=1, keepdim=True)  # Example target
-    y, h_prev = model(x, h_prev)
-    loss = criterion(y, target)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()

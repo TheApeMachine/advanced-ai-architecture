@@ -39,26 +39,3 @@ class TargetNetwork(nn.Module):
         x = torch.relu(torch.matmul(x, w1.t()) + b1)
         x = torch.matmul(x, w2.t()) + b2
         return x
-
-# Usage
-input_size = 10
-hidden_size = 20
-output_size = 1
-
-# Define target network dimensions
-target_dims = [(hidden_size, input_size),  # w1
-               (hidden_size,),             # b1
-               (output_size, hidden_size), # w2
-               (output_size,)]             # b2
-
-hyper_net = HyperNetwork(z_dim=5, target_dims=target_dims)
-target_net = TargetNetwork(input_size, hidden_size, output_size)
-
-# Task-specific embedding
-z = torch.randn(1, 5)
-weights = hyper_net(z)
-
-# Input data
-x = torch.randn(1, input_size)
-output = target_net(x, weights)
-print(output)

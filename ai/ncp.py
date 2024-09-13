@@ -14,14 +14,3 @@ class NCPCell(nn.Module):
         h = self.activation(self.input_weights(x) + self.recurrent_weights(h_prev))
         y = self.output_weights(h)
         return y, h
-
-# Example usage
-input_size = 10
-hidden_size = 50
-
-ncp_cell = NCPCell(input_size, hidden_size)
-h_prev = torch.zeros(1, hidden_size)
-x = torch.randn(1, input_size)
-
-y, h_prev = ncp_cell(x, h_prev)
-print(y)

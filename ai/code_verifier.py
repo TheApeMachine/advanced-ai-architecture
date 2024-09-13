@@ -8,6 +8,8 @@ class CodeVerifier:
         pass
 
     def is_syntax_valid(self, code_str):
+        if not isinstance(code_str, str):
+            return False, f"Expected string, got {type(code_str)}"
         try:
             ast.parse(code_str)
             return True, ""
@@ -15,6 +17,9 @@ class CodeVerifier:
             return False, str(e)
 
     def run_tests(self, code_str, test_code_str):
+        if not isinstance(code_str, str) or not isinstance(test_code_str, str):
+            return False, "Code and test code must be strings"
+
         with tempfile.NamedTemporaryFile(delete=False, suffix='.py') as tmp_code_file:
             tmp_code_file.write(code_str.encode('utf-8'))
             code_filename = tmp_code_file.name
@@ -36,35 +41,3 @@ class CodeVerifier:
             os.unlink(test_filename)
 
         return success, output
-
-# Example usage
-if __name__ == "__main__":
-    verifier = CodeVerifier()
-    code = '''
-def factorial(n):
-    if n == 0:
-        return 1
-    else:
-        return n * factorial(n - 1)
-'''
-    test_code = '''
-import sys
-sys.path.insert(0, '.')
-from temp_code import factorial
-
-assert factorial(0) == 1
-assert factorial(5) == 120
-print("All tests passed.")
-'''
-
-    is_valid, error = verifier.is_syntax_valid(code)
-    if is_valid:
-        success, output = verifier.run_tests(code, test_code)
-        if success:
-            print("Code passed all tests.")
-        else:
-            print("Code failed tests:")
-            print(output)
-    else:
-        print("Syntax Error:")
-        print(error)
